@@ -11,16 +11,28 @@ const bookSchema = new Schema({
     type: String,
     required: true,
   },
-  // saved book id from GoogleBooks
+  // Saved book id from GoogleBooks
   bookId: {
     type: String,
     required: true,
   },
   image: {
     type: String,
+    validate: {
+      validator: function(v) {
+        return /^https?:\/\/.+\.(jpg|jpeg|png|gif|bmp|svg)$/.test(v);
+      },
+      message: props => `${props.value} is not a valid image URL!`
+    }
   },
   link: {
     type: String,
+    validate: {
+      validator: function(v) {
+        return /^https?:\/\//.test(v);
+      },
+      message: props => `${props.value} is not a valid URL!`
+    }
   },
   title: {
     type: String,

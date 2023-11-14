@@ -1,3 +1,4 @@
+// LoginForm.jsx
 import React, { useState } from 'react';
 import { Form, Button, Alert } from 'react-bootstrap';
 import { useMutation } from '@apollo/client';
@@ -9,7 +10,15 @@ const LoginForm = () => {
   const [validated] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
 
-  const [loginUser, { error }] = useMutation(LOGIN_USER);
+  const [loginUser, { error }] = useMutation(LOGIN_USER, {
+    onCompleted: (data) => {
+      Auth.login(data.loginUser.token);
+    },
+    onError: (err) => {
+      console.error(err);
+      setShowAlert(true);
+    }
+  });
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
@@ -24,14 +33,11 @@ const LoginForm = () => {
     }
 
     try {
-      const { data } = await loginUser({ variables: { ...userFormData } });
-      Auth.login(data.loginUser.token);
+      await loginUser({ variables: { ...userFormData } });
     } catch (err) {
       console.error(err);
       setShowAlert(true);
     }
-
-    setUserFormData({ email: '', password: '' });
   };
 
   return (
