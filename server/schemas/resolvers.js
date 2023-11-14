@@ -5,7 +5,6 @@ const { signToken } = require('../utils/auth');
 
 const resolvers = {
   Query: {
-    // Assume a user is already authenticated and their id is in context
     me: async (parent, args, context) => {
       if (!context.user) {
         throw new AuthenticationError('Not logged in');
@@ -15,24 +14,45 @@ const resolvers = {
   },
   Mutation: {
     login: async (parent, { email, password }) => {
-      // Login logic here (make sure to include context.user check if necessary)
+      const user = await User.findOne({ email });
+      if (!user) {
+        throw new AuthenticationError('Incorrect credentials');
+      }
+
+      const correctPw = await user.isCorrectPassword(password);
+      if (!correctPw) {
+        throw new AuthenticationError('Incorrect credentials');
+      }
+
+      const token = signToken(user);
+      return { token, user };
     },
     addUser: async (parent, { username, email, password }) => {
-      // User creation logic here
+      const user = await User.create({ username, email, password });
+      const token = signToken(user);
+      return { token, user };
     },
-    saveBook: async (parent, { bookId }, context) => {
-      // Check if user is authenticated
+    saveBook: async (parent, { bookData }, context) => {
       if (!context.user) {
         throw new AuthenticationError('You need to be logged in to save a book');
       }
-      // Logic to save a book for the authenticated user here
+
+      return await User.findByIdAndUpdate(
+        context.user._id,
+        { $addToSet: { savedBooks: bookData } },
+        { new: true }
+      );
     },
     removeBook: async (parent, { bookId }, context) => {
-      // Check if user is authenticated
       if (!context.user) {
         throw new AuthenticationError('You need to be logged in to remove a book');
       }
-      // Logic to remove a book for the authenticated user here
+
+      return await User.findByIdAndUpdate(
+        context.user._id,
+        { $pull: { savedBooks: { bookId } } },
+        { new: true }
+      );
     }
   }
 };

@@ -5,7 +5,7 @@ const { typeDefs, resolvers } = require('./schemas');
 const { authMiddleware } = require('./utils/auth');
 const path = require('path');
 const db = require('./config/connection');
-const routes = require('./routes');
+// const routes = require('./routes'); // Commented out as no longer needed for GraphQL setup
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -28,7 +28,8 @@ const server = new ApolloServer({
 // Apply Apollo GraphQL middleware and set the path to /graphql
 server.applyMiddleware({ app, path: '/graphql' });
 
-app.use(routes);
+// Commented out the RESTful routes setup as Apollo Server will handle the API routes
+// app.use(routes);
 
 db.once('open', () => {
   app.listen(PORT, () => console.log(`🌍 Now listening on localhost:${PORT}`));
