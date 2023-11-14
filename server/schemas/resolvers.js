@@ -15,16 +15,24 @@ const resolvers = {
   },
   Mutation: {
     login: async (parent, { email, password }) => {
-      // Login logic here
+      // Login logic here (make sure to include context.user check if necessary)
     },
     addUser: async (parent, { username, email, password }) => {
       // User creation logic here
     },
     saveBook: async (parent, { bookId }, context) => {
-      // Logic to save a book here
+      // Check if user is authenticated
+      if (!context.user) {
+        throw new AuthenticationError('You need to be logged in to save a book');
+      }
+      // Logic to save a book for the authenticated user here
     },
     removeBook: async (parent, { bookId }, context) => {
-      // Logic to remove a book here
+      // Check if user is authenticated
+      if (!context.user) {
+        throw new AuthenticationError('You need to be logged in to remove a book');
+      }
+      // Logic to remove a book for the authenticated user here
     }
   }
 };
