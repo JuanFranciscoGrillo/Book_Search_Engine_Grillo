@@ -1,39 +1,38 @@
+// utils/auth.js
 const jwt = require('jsonwebtoken');
-
-// set token secret and expiration date
-const secret = 'mysecretsshhhhh';
+const secret = 'mysecretsshhhhh'; // Replace with your secret
 const expiration = '2h';
 
 module.exports = {
-  // function for our authenticated routes
-  authMiddleware: function (req, res, next) {
-    // allows token to be sent via  req.query or headers
-    let token = req.query.token || req.headers.authorization;
+  authMiddleware: function (context) {
+    // Extracting req from context, which is provided in GraphQL setup
+    const req = context.req || context.request;
 
-    // ["Bearer", "<tokenvalue>"]
+    let token = req.body.token || req.query.token || req.headers.authorization;
+
     if (req.headers.authorization) {
       token = token.split(' ').pop().trim();
     }
 
     if (!token) {
-      return res.status(400).json({ message: 'You have no token!' });
+      // In GraphQL, we don't necessarily want to return a response, so we just return the context
+      return context;
     }
 
-    // verify token and get user data out of it
     try {
+      // Verifying the token
       const { data } = jwt.verify(token, secret, { maxAge: expiration });
-      req.user = data;
+      // Adding the user data to the context
+      context.user = data;
     } catch {
       console.log('Invalid token');
-      return res.status(400).json({ message: 'invalid token!' });
+      // Here too, just return the context
     }
 
-    // send to next endpoint
-    next();
+    return context;
   },
   signToken: function ({ username, email, _id }) {
     const payload = { username, email, _id };
-
     return jwt.sign({ data: payload }, secret, { expiresIn: expiration });
   },
 };
