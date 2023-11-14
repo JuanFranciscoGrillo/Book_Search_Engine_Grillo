@@ -1,14 +1,14 @@
-import './App.css';
-import { Outlet } from 'react-router-dom';
-
-import Navbar from './components/Navbar';
+// src/App.jsx
+import React from 'react';
+import { ApolloProvider } from '@apollo/client';
+import client from './apollo';
+import YourRootComponent from './YourRootComponent';
 
 function App() {
   return (
-    <>
-      <Navbar />
-      <Outlet />
-    </>
+    <ApolloProvider client={client}>
+      <YourRootComponent />
+    </ApolloProvider>
   );
 }
 
